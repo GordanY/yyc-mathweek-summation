@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>大加樂</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body,#root{width:100%;height:100%;overflow:hidden}
+    body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei",sans-serif;background:linear-gradient(135deg,#eef2ff,#e0e7ff,#c7d2fe);-webkit-tap-highlight-color:transparent}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes popIn{0%{transform:scale(0);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+    @keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+    @keyframes celebrate{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.35)}50%{box-shadow:0 0 0 10px rgba(99,102,241,0)}}
+    .fade{animation:fadeIn .45s ease-out both}
+    .pop{animation:popIn .35s ease-out both}
+    .app{display:flex;flex-direction:column;height:100%;overflow:hidden}
+    .hdr{background:#fff;padding:14px 18px;box-shadow:0 2px 10px rgba(0,0,0,.07);flex-shrink:0;z-index:10}
+    .hdr-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .hdr h1{font-size:1.4rem;font-weight:800;color:#1e1b4b}
+    .badge{background:#6366f1;color:#fff;font-weight:700;font-size:.85rem;padding:3px 12px;border-radius:16px}
+    .steps{display:flex;gap:6px;margin-top:6px}
+    .step{flex:1;height:4px;border-radius:2px;background:#e5e7eb;transition:background .3s}
+    .step.done{background:#6366f1}.step.act{background:#a5b4fc;animation:pulse 2s infinite}
+    .body{flex:1;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch}
+    .card{background:#fff;border-radius:18px;padding:22px;box-shadow:0 3px 20px rgba(0,0,0,.055);max-width:780px;margin:0 auto;animation:fadeIn .45s ease-out}
+    .card h2{font-size:1.25rem;font-weight:800;color:#1e1b4b;margin-bottom:6px;line-height:1.35}
+    .sub{font-size:.95rem;color:#6b7280;margin-bottom:14px;line-height:1.45}
+    .viz{background:#f8fafc;border-radius:14px;padding:10px;margin-bottom:14px;overflow:hidden}
+    .viz svg{display:block;width:100%;height:auto}
+    .btn{display:block;width:100%;padding:13px;border:none;border-radius:13px;font-size:1rem;font-weight:700;cursor:pointer;transition:transform .12s,opacity .12s;-webkit-appearance:none;touch-action:manipulation}
+    .btn:active{transform:scale(.97);opacity:.85}
+    .btn+.btn{margin-top:8px}
+    .pri{background:linear-gradient(135deg,#6366f1,#7c3aed);color:#fff}
+    .grn{background:linear-gradient(135deg,#10b981,#059669);color:#fff}
+    .org{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}
+    .pur{background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff}
+    .gry{background:#e5e7eb;color:#4b5563}
+    .dis{background:#d1d5db;color:#9ca3af;pointer-events:none}
+    .info{border-radius:12px;padding:14px;margin:10px 0}
+    .info.bl{background:#eff6ff;border:2px solid #bfdbfe}
+    .info.gn{background:#ecfdf5;border:2px solid #a7f3d0}
+    .info.yw{background:#fffbeb;border:2px solid #fde68a}
+    .info.og{background:#fff7ed;border:2px solid #fed7aa}
+    .info.rd{background:#fef2f2;border:2px solid #fecaca}
+    .info p{font-size:.9rem;color:#374151;line-height:1.45}
+    .info p+p{margin-top:4px}
+    .f{font-weight:700;text-align:center;color:#1e1b4b;font-size:1rem}
+    .sum{text-align:center;font-size:1.15rem;font-weight:700;color:#4338ca;padding:8px;margin:6px 0}
+    .inp{margin:14px 0}
+    .inp label{display:block;font-weight:700;font-size:.95rem;color:#374151;margin-bottom:6px}
+    .inp input{width:100%;padding:12px 14px;font-size:1.15rem;border:2px solid #d1d5db;border-radius:12px;outline:none;transition:border-color .2s;-webkit-appearance:none}
+    .inp input:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+    .frac-inp{display:flex;align-items:center;gap:8px}
+    .frac-inp input{width:80px;text-align:center}
+    .frac-inp .slash{font-size:1.5rem;font-weight:700;color:#6b7280}
+    .calc-wrap{background:#f8fafc;border:2px solid #e2e8f0;border-radius:14px;padding:14px;margin:14px 0}
+    .calc-wrap:focus-within{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+    .calc-expr{width:100%;padding:12px 14px;font-size:1.25rem;font-family:'SF Mono',Monaco,Consolas,monospace;border:none;background:transparent;outline:none;color:#1e1b4b}
+    .calc-expr::placeholder{color:#a5b4fc}
+    .calc-preview{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;margin-top:8px;background:#eef2ff;border-radius:10px;min-height:38px}
+    .calc-preview .eq{font-size:.85rem;color:#6b7280;font-family:'SF Mono',Monaco,Consolas,monospace}
+    .calc-preview .res{font-size:1.15rem;font-weight:800;color:#4338ca;font-family:'SF Mono',Monaco,Consolas,monospace}
+    .calc-preview .err{font-size:.85rem;color:#ef4444;font-style:italic}
+    .calc-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+    .calc-b{padding:10px 4px;border:none;border-radius:8px;background:#e0e7ff;color:#4338ca;font-size:1.05rem;font-weight:700;cursor:pointer;font-family:'SF Mono',Monaco,Consolas,monospace;transition:background .12s,transform .1s;touch-action:manipulation;text-align:center}
+    .calc-b:active{background:#c7d2fe;transform:scale(.95)}
+    .calc-b.op{background:#ddd6fe;color:#7c3aed}
+    .calc-b.del{background:#fce7f3;color:#db2777}
+    .fb{border-radius:12px;padding:18px;text-align:center;margin:10px 0}
+    .fb.ok{background:#ecfdf5;border:2px solid #34d399}
+    .fb.no{background:#fef2f2;border:2px solid #f87171}
+    .fb .em{font-size:2.2rem;margin-bottom:6px}
+    .fb .mg{font-size:1.2rem;font-weight:800;color:#1e1b4b}
+    .fb .dt{font-size:.9rem;color:#6b7280;margin-top:4px}
+    .conf{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999;overflow:hidden}
+    .conf-p{position:absolute;width:10px;height:6px;border-radius:2px;animation:confettiFall 3s ease-in forwards}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    @keyframes sparkle{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+    .home{display:flex;flex-direction:column;align-items:center;min-height:100%;padding:20px 16px 40px;overflow-y:auto}
+    .home-hero{text-align:center;margin-bottom:24px;position:relative}
+    .home-symbols{font-size:2.2rem;margin-bottom:6px;animation:float 3s ease-in-out infinite;letter-spacing:8px}
+    .home-title{font-size:2.8rem;font-weight:900;background:linear-gradient(135deg,#6366f1,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:4px;line-height:1.3}
+    .home-sub{font-size:1rem;color:#7c7c9a;margin-top:4px;font-weight:500}
+    .home-deco{position:absolute;font-size:1.4rem;opacity:.35;pointer-events:none}
+    .home-grid{display:flex;flex-direction:column;gap:14px;width:100%;max-width:480px}
+    .lv-card{position:relative;border-radius:20px;padding:22px 20px 20px;cursor:pointer;transition:transform .18s,box-shadow .18s;touch-action:manipulation;overflow:hidden;border:none}
+    .lv-card:active{transform:scale(.97)}
+    .lv-card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.12)}
+    .lv-card .lv-bg{position:absolute;top:0;left:0;right:0;bottom:0;opacity:.12;pointer-events:none}
+    .lv-num{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;opacity:.7;margin-bottom:6px}
+    .lv-card h3{font-size:1.2rem;font-weight:800;margin-bottom:4px;color:#fff}
+    .lv-card p{font-size:.88rem;color:rgba(255,255,255,.8);margin:0;line-height:1.4}
+    .lv-icon{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:2.2rem;opacity:.3}
+    .lv-arrow{position:absolute;right:16px;bottom:16px;width:28px;height:28px;background:rgba(255,255,255,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#fff;font-weight:700}
+    .home-footer{margin-top:28px;text-align:center;font-size:.8rem;color:#a5a5c0}
+    .sparkle{position:absolute;width:6px;height:6px;border-radius:50%;animation:sparkle 2s ease-in-out infinite}
+    .comp{text-align:center}
+    .comp .big{font-size:3.5rem;animation:celebrate 1s ease infinite;margin-bottom:10px}
+    @media(min-width:768px){.hdr h1{font-size:1.7rem}.card{padding:28px}.card h2{font-size:1.5rem}}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useMemo,useCallback} = React;
+const C = ['#FF6B6B','#4ECDC4','#45B7D1','#FFA07A','#98D8C8','#F7DC6F','#BB8FCE','#85C1E2'];
+const CC = ['#FF6B6B','#4ECDC4','#FFA07A','#F7DC6F','#BB8FCE','#6366f1','#10b981','#f59e0b'];
+
+/* ── helpers ── */
+const mid = (a,b) => [(a[0]+b[0])/2,(a[1]+b[1])/2];
+
+/* ── Safe math expression evaluator ── */
+function safeEval(expr){
+  try{
+    // Strip whitespace, allow only digits, operators, parens, decimal
+    const clean = expr.replace(/\s/g,'');
+    if(!clean) return {val:null,err:null};
+    if(!/^[\d+\-*/().^]+$/.test(clean)) return {val:null,err:'含有無效字符'};
+    // Replace ^ with ** for exponentiation
+    const js = clean.replace(/\^/g,'**');
+    // Use Function for sandboxed eval (no access to globals)
+    const fn = new Function('return ('+js+')');
+    const result = fn();
+    if(typeof result!=='number'||!isFinite(result)) return {val:null,err:'計算錯誤'};
+    return {val:result,err:null};
+  }catch(e){return {val:null,err:'表達式格式錯誤'};}
+}
+
+/* ── CalcInput: expression calculator widget ── */
+function CalcInput({value,onChange,onSubmit,placeholder,disabled}){
+  const inputRef = React.useRef(null);
+  const ev = safeEval(value);
+  const buttons = ['7','8','9','÷','4','5','6','×','1','2','3','-','0','.','(',')','(',')','+','^'];
+  // 4-col grid: [7 8 9 ÷] [4 5 6 ×] [1 2 3 -] [0 . ( )] [( ) + ^]
+  const btns = [
+    {l:'7',v:'7'},{l:'8',v:'8'},{l:'9',v:'9'},{l:'÷',v:'/',op:true},
+    {l:'4',v:'4'},{l:'5',v:'5'},{l:'6',v:'6'},{l:'×',v:'*',op:true},
+    {l:'1',v:'1'},{l:'2',v:'2'},{l:'3',v:'3'},{l:'-',v:'-',op:true},
+    {l:'0',v:'0'},{l:'.',v:'.'},{l:'(',v:'('},{l:')',v:')'},
+    {l:'^',v:'^',op:true},{l:'+',v:'+',op:true},{l:'⌫',v:'DEL',op:false,del:true},{l:'C',v:'CLR',op:false,del:true},
+  ];
+
+  const insert = (ch)=>{
+    const el = inputRef.current;
+    if(!el) return;
+    const start = el.selectionStart||value.length;
+    const end = el.selectionEnd||value.length;
+    const nv = value.slice(0,start)+ch+value.slice(end);
+    onChange(nv);
+    // restore cursor after React re-render
+    setTimeout(()=>{el.focus();el.setSelectionRange(start+ch.length,start+ch.length);},0);
+  };
+
+  const backspace = ()=>{
+    const el = inputRef.current;
+    if(!el||!value) return;
+    const start = el.selectionStart||value.length;
+    const end = el.selectionEnd||value.length;
+    const nv = start===end ? value.slice(0,start-1)+value.slice(start) : value.slice(0,start)+value.slice(end);
+    const cur = start===end ? Math.max(0,start-1) : start;
+    onChange(nv);
+    setTimeout(()=>{el.focus();el.setSelectionRange(cur,cur);},0);
+  };
+
+  const handleKey = (e)=>{if(e.key==='Enter'&&onSubmit&&ev.val!==null)onSubmit();};
+
+  return <div className="calc-wrap">
+    <input ref={inputRef} className="calc-expr" type="text" inputMode="text"
+      value={value} onChange={e=>onChange(e.target.value)}
+      onKeyDown={handleKey}
+      placeholder={placeholder||'輸入算式，例如 7*(2+23)/2'}
+      disabled={disabled}/>
+    <div className="calc-preview">
+      {value ? (
+        ev.err ? <span className="err">{ev.err}</span> :
+        ev.val!==null ? <>
+          <span className="eq">{value} =</span>
+          <span className="res">{Number.isInteger(ev.val)?ev.val:ev.val.toFixed(6).replace(/\.?0+$/,'')}</span>
+        </> : <span className="eq">…</span>
+      ) : <span className="eq" style={{color:'#a5b4fc'}}>計算結果會顯示在這裡</span>}
+    </div>
+    <div className="calc-btns">
+      {btns.map((b,i)=><button key={i} type="button"
+        className={'calc-b'+(b.op?' op':'')+(b.del?' del':'')}
+        style={i>=16?{gridColumn:'span 2'}:undefined}
+        onClick={()=>b.v==='DEL'?backspace():b.v==='CLR'?onChange(''):insert(b.v)} disabled={disabled}>{b.l}</button>)}
+    </div>
+  </div>;
+}
+
+function Confetti({show}){
+  const ps = useMemo(()=>Array.from({length:45},(_,i)=>({id:i,l:Math.random()*100,d:Math.random()*1.5,s:6+Math.random()*7,c:CC[i%CC.length]})),[]);
+  if(!show) return null;
+  return <div className="conf">{ps.map(p=><div key={p.id} className="conf-p" style={{left:p.l+'%',top:'-15px',width:p.s,height:p.s*.6,background:p.c,animationDelay:p.d+'s'}}/>)}</div>;
+}
+
+/* ══════════════════════════════════════
+   LEVEL 1 — Arithmetic Series
+   ══════════════════════════════════════ */
+
+/* Staircase + pairing SVG for any AS */
+function StaircaseSVG({terms,showPair}){
+  const n = terms.length;
+  const first = terms[0], last = terms[n-1], total = first+last;
+  const barW = Math.min(48, Math.max(4, 320/n));
+  const gap = n > 20 ? 0 : Math.min(4, 2);
+  const marginL = 28, marginR = showPair ? 50 : 16;
+  const barsW = n*(barW+gap)-gap;
+  const svgW = marginL + barsW + marginR;
+  const chartH = 150;
+  const scale = chartH / (total * 1.05);
+  const baseY = chartH + 20;
+  const labelStep = n > 30 ? 10 : n > 15 ? 5 : 1;
+  const rectTop = baseY - total*scale;
+  const rectH = total*scale;
+  const dimX = marginL + barsW + 8; // x position for dimension line
+
+  return (
+    <svg viewBox={`0 0 ${svgW} ${baseY + 22}`}>
+      {/* Dashed rectangle outline when paired */}
+      {showPair && <rect x={marginL} y={rectTop} width={barsW} height={rectH} fill="none" stroke="#6366f1" strokeWidth="2" strokeDasharray="5,3" rx="3"/>}
+
+      {/* Bars */}
+      {terms.map((v,i)=>{
+        const x = marginL + i*(barW+gap);
+        const h = v*scale;
+        const fv = terms[n-1-i];
+        const fh = fv*scale;
+        const showIdx = n<=15 || (i%labelStep===0) || i===n-1;
+        return <g key={i}>
+          {/* Original bar */}
+          <rect x={x} y={baseY-h} width={barW} height={h} fill={C[i%C.length]} stroke="#fff" strokeWidth={n>20?.3:1} rx={n>20?0:3} opacity=".8"/>
+          {/* Value label inside bar (small n only) */}
+          {n<=15 && <text x={x+barW/2} y={baseY-h+15} textAnchor="middle" fontSize="10" fontWeight="700" fill="#fff">{v}</text>}
+          {/* Bottom axis: term index */}
+          {showIdx && <text x={x+barW/2} y={baseY+14} textAnchor="middle" fontSize={n>20?"7":"9"} fontWeight="600" fill="#6b7280">{n>20?(i+1):'n='+(i+1)}</text>}
+          {/* Flipped bar */}
+          {showPair && <rect x={x} y={baseY-h-fh} width={barW} height={fh} fill={C[(i+4)%C.length]} stroke="#fff" strokeWidth={n>20?.3:1} rx={n>20?0:3} opacity=".45" className="pop"/>}
+          {/* Flipped bar value label (small n only) */}
+          {showPair && n<=15 && <text x={x+barW/2} y={baseY-h-fh+15} textAnchor="middle" fontSize="10" fontWeight="700" fill="#fff" opacity=".7">{fv}</text>}
+        </g>;
+      })}
+
+      {/* Height dimension line on the right when paired */}
+      {showPair && <>
+        {/* Vertical line */}
+        <line x1={dimX} y1={rectTop} x2={dimX} y2={baseY} stroke="#6366f1" strokeWidth="1.5"/>
+        {/* Top tick */}
+        <line x1={dimX-3} y1={rectTop} x2={dimX+3} y2={rectTop} stroke="#6366f1" strokeWidth="1.5"/>
+        {/* Bottom tick */}
+        <line x1={dimX-3} y1={baseY} x2={dimX+3} y2={baseY} stroke="#6366f1" strokeWidth="1.5"/>
+        {/* Height label */}
+        <text x={dimX+4} y={rectTop + rectH/2 + 4} fontSize="11" fontWeight="700" fill="#6366f1">{total}</text>
+      </>}
+    </svg>
+  );
+}
+
+/* Phase 1.1: 1+2+3+4+5 (simple intro) */
+function L1P1({onNext}){
+  const [showPair,setShowPair] = useState(false);
+  const terms = useMemo(()=>[1,2,3,4,5],[]);
+  const n=5, sum=n*(n+1)/2;
+  return <div className="card fade">
+    <h2>自然數之和：1 + 2 + 3 + 4 + 5</h2>
+    <p className="sub">先用一個小例子來理解「配對法」。每根柱代表一個數。</p>
+    <div className="viz"><StaircaseSVG terms={terms} showPair={showPair}/></div>
+    <button className={"btn "+(showPair?"org":"grn")} onClick={()=>setShowPair(s=>!s)}>
+      {showPair?'隱藏配對':'顯示配對（翻轉相加）'}
+    </button>
+    {showPair && <div className="info gn fade">
+      <p className="f">每列之和 = 1 + 5 = 2 + 4 = 3 + 3 = 6</p>
+      <p className="f">矩形面積 = 6 × 5 = 30</p>
+      <p className="f" style={{fontSize:'1.1rem',marginTop:6}}>S = 30 ÷ 2 = <strong>{sum}</strong></p>
+      <p style={{textAlign:'center',marginTop:6,fontWeight:600,color:'#6366f1'}}>公式：S = n(n+1) / 2</p>
+    </div>}
+    {showPair && <button className="btn pri fade" onClick={onNext}>下一步 →</button>}
+  </div>;
+}
+
+/* Phase 1.2: 1+2+3+...+50 */
+function L1P2({onNext}){
+  const [showPair,setShowPair] = useState(false);
+  const terms = useMemo(()=>Array.from({length:50},(_,i)=>i+1),[]);
+  const n=50, sum=n*(n+1)/2;
+  return <div className="card fade">
+    <h2>自然數之和：1 + 2 + 3 + … + 50</h2>
+    <p className="sub">同樣的方法，應用到更大的數列。觀察階梯圖如何形成矩形。</p>
+    <div className="viz"><StaircaseSVG terms={terms} showPair={showPair}/></div>
+    <button className={"btn "+(showPair?"org":"grn")} onClick={()=>setShowPair(s=>!s)}>
+      {showPair?'隱藏配對':'顯示配對（翻轉相加）'}
+    </button>
+    {showPair && <div className="info gn fade">
+      <p className="f">每列之和 = 1 + 50 = 2 + 49 = … = 51</p>
+      <p className="f">矩形面積 = 51 × 50 = 2550</p>
+      <p className="f" style={{fontSize:'1.1rem',marginTop:6}}>S = 2550 ÷ 2 = <strong>{sum}</strong></p>
+      <p style={{textAlign:'center',marginTop:6,fontWeight:600,color:'#6366f1'}}>公式：S = n(n+1) / 2</p>
+    </div>}
+    {showPair && <button className="btn pri fade" onClick={onNext}>下一步 →</button>}
+  </div>;
+}
+
+/* Phase 1.3: General AS a=4, d=5, n=10 */
+function L1P3({onNext}){
+  const [showPair,setShowPair] = useState(false);
+  const a=4,d=5,n=10;
+  const terms = useMemo(()=>Array.from({length:n},(_,i)=>a+i*d),[]);
+  const first=terms[0],last=terms[n-1],total=first+last,sum=n*total/2;
+  return <div className="card fade">
+    <h2>等差級數：4, 9, 14, …, 49</h2>
+    <p className="sub">首項 a = {a}，公差 d = {d}，共 {n} 項。用同樣的配對法求和。</p>
+    <div className="viz"><StaircaseSVG terms={terms} showPair={showPair}/></div>
+    <button className={"btn "+(showPair?"org":"grn")} onClick={()=>setShowPair(s=>!s)}>
+      {showPair?'隱藏配對':'顯示配對（翻轉相加）'}
+    </button>
+    {showPair && <div className="info gn fade">
+      <p className="f">每列之和 = {first} + {last} = {total}</p>
+      <p className="f">矩形面積 = {total} × {n} = {total*n}</p>
+      <p className="f" style={{fontSize:'1.1rem',marginTop:6}}>S = {total*n} ÷ 2 = <strong>{sum}</strong></p>
+      <p style={{textAlign:'center',marginTop:6,fontWeight:600,color:'#6366f1'}}>公式：S = n(a₁ + aₙ) / 2</p>
+    </div>}
+    {showPair && <button className="btn pri fade" onClick={onNext}>下一步 →</button>}
+  </div>;
+}
+
+/* Phase 1.4: Challenge a=2, d=3, n=8 → sum=100 */
+function L1P4({onNext}){
+  const [ans,setAns] = useState('');
+  const [fb,setFb] = useState(null);
+  const [hint,setHint] = useState(0);
+  const [showPair,setShowPair] = useState(false);
+  const [conf,setConf] = useState(false);
+  const a=2,d=3,n=8;
+  const terms = useMemo(()=>Array.from({length:n},(_,i)=>a+i*d),[]);
+  const first=terms[0],last=terms[n-1],total=first+last,correct=n*total/2; // 100
+
+  const submit = ()=>{
+    const ev = safeEval(ans);
+    if(ev.val!==null && Math.abs(ev.val-correct)<0.001){setFb('ok');setConf(true);setTimeout(()=>setConf(false),3500);}
+    else{setFb('no');if(hint<2)setHint(h=>h+1);}
+  };
+
+  return <div className="card fade">
+    <Confetti show={conf}/>
+    <h2>🏆 挑戰題</h2>
+    <div className="info yw">
+      <p style={{fontWeight:700,fontSize:'1.02rem'}}>等差數列：首項 a = {a}，公差 d = {d}</p>
+      <p style={{fontWeight:700,fontSize:'1.02rem'}}>求首 {n} 項之和</p>
+      <p style={{marginTop:6,color:'#92400e',fontSize:'.85rem'}}>數列：{terms.join(', ')}, …</p>
+    </div>
+    <div className="viz"><StaircaseSVG terms={terms} showPair={showPair}/></div>
+    <button className={"btn "+(showPair?"org":"grn")} onClick={()=>setShowPair(s=>!s)}>
+      {showPair?'隱藏配對':'顯示配對（翻轉相加）'}
+    </button>
+    {hint>=1 && <div className="info og fade"><p style={{fontWeight:700}}>💡 提示 1：首項 = {first}，末項 = {last}</p><p>首項 + 末項 = {first} + {last} = {total}</p></div>}
+    {hint>=2 && <div className="info og fade"><p style={{fontWeight:700}}>💡 提示 2：共 {n} 項</p><p>S = {n} × {total} / 2 = ?</p></div>}
+    <div className="inp"><label>輸入算式計算答案：</label></div>
+    <CalcInput value={ans} onChange={v=>{setAns(v);setFb(null);}} onSubmit={submit} placeholder={'例如 '+n+'*('+first+'+'+last+')/2'} disabled={fb==='ok'}/>
+    <button className={"btn "+(ans&&safeEval(ans).val!==null?"pri":"dis")} onClick={submit} disabled={!ans||safeEval(ans).val===null}>提交答案</button>
+    {fb==='ok' && <div className="fb ok fade"><div className="em">🎉</div><div className="mg">答對了！</div><div className="dt">S = {n} × ({first} + {last}) / 2 = {n} × {total/2} = {correct}</div></div>}
+    {fb==='no' && <div className="fb no fade"><div className="mg">再試一次！</div><div className="dt">試試利用配對工具分析</div></div>}
+    {fb==='ok' && <button className="btn grn" onClick={onNext}>完成關卡！→</button>}
+  </div>;
+}
+
+/* ══════════════════════════════════════
+   LEVEL 2 — Infinite Geometric Series
+   ══════════════════════════════════════ */
+
+/* Phase 2.1: 1/2 + 1/4 + 1/8 + ... = 1 (square filling) */
+function L2P1({onNext}){
+  const [count,setCount] = useState(0);
+  const pieces = useMemo(()=>[
+    {v:'1/2',  n:.5,    w:.5,   h:1,    x:0,    y:0},
+    {v:'1/4',  n:.25,   w:.5,   h:.5,   x:.5,   y:.5},
+    {v:'1/8',  n:.125,  w:.25,  h:.5,   x:.5,   y:0},
+    {v:'1/16', n:1/16,  w:.25,  h:.25,  x:.75,  y:0},
+    {v:'1/32', n:1/32,  w:.125, h:.25,  x:.75,  y:.25},
+    {v:'1/64', n:1/64,  w:.125, h:.125, x:.875, y:.25},
+    {v:'1/128',n:1/128, w:.0625,h:.125, x:.875, y:.375},
+  ],[]);
+  const sum = pieces.slice(0,count).reduce((s,p)=>s+p.n,0);
+  const S = 200;
+
+  return <div className="card fade">
+    <h2>無窮幾何級數：½ + ¼ + ⅛ + … = 1</h2>
+    <p className="sub">觀察：把正方形不斷分成兩半，逐步填滿整個正方形（面積 = 1）</p>
+    <div className="viz">
+      <svg viewBox={`0 0 ${S+30} ${S+40}`}>
+        <rect x="10" y="10" width={S} height={S} fill="none" stroke="#c7d2fe" strokeWidth="2" strokeDasharray="5,3" rx="3"/>
+        <text x={10+S/2} y={S+28} textAnchor="middle" fontSize="11" fill="#a5b4fc" fontWeight="600">目標 = 1</text>
+        {pieces.slice(0,count).map((p,i)=>
+          <g key={i} className="pop">
+            <rect x={10+p.x*S} y={10+p.y*S} width={p.w*S} height={p.h*S} fill={C[i]} stroke="#fff" strokeWidth="1.5" rx="2" opacity=".85"/>
+            {p.w*S>20 && p.h*S>16 && <text x={10+p.x*S+p.w*S/2} y={10+p.y*S+p.h*S/2+4} textAnchor="middle" fontSize={Math.max(8,Math.min(14,p.w*S*.28))} fill="#fff" fontWeight="700">{p.v}</text>}
+          </g>
+        )}
+      </svg>
+    </div>
+    <div className="info bl">
+      <p className="f" style={{fontSize:'.88rem'}}>{count===0?'點擊下方按鈕開始':pieces.slice(0,count).map((p,i)=>(i>0?' + ':'')+p.v).join('')+' = '+sum.toFixed(count>4?6:4)}</p>
+    </div>
+    <div className="sum">目前總和：{sum.toFixed(6)}</div>
+    {count<pieces.length?
+      <button className="btn grn" onClick={()=>setCount(c=>c+1)}>加入下一項（+{pieces[count].v}）</button>:
+      <div className="info gn" style={{textAlign:'center'}}><p className="f">✓ 總和趨向 1！</p></div>}
+    {count>=pieces.length && <button className="btn pri fade" onClick={onNext}>下一步 →</button>}
+  </div>;
+}
+
+/* Phase 2.2: 1/3 + 1/9 + 1/27 + ... = 1/2 (square two-color proof) */
+function L2P2({onNext}){
+  const [depth,setDepth] = useState(0);
+  const maxDepth = 5;
+  const S = 220;
+
+  // Generate red/green rectangles recursively
+  const rects = useMemo(()=>{
+    const out = [];
+    let rx=0,ry=0,rw=1,rh=1;
+    for(let d=0;d<maxDepth;d++){
+      if(d%2===0){// vertical split
+        const sw=rw/3;
+        out.push({x:rx,y:ry,w:sw,h:rh,c:0,d}); // red (left)
+        out.push({x:rx+2*sw,y:ry,w:sw,h:rh,c:1,d}); // green (right)
+        rx+=sw; rw=sw; // remaining = middle strip
+      } else {// horizontal split
+        const sh=rh/3;
+        out.push({x:rx,y:ry,w:rw,h:sh,c:0,d}); // red (top)
+        out.push({x:rx,y:ry+2*sh,w:rw,h:sh,c:1,d}); // green (bottom)
+        ry+=sh; rh=sh; // remaining = middle strip
+      }
+    }
+    return out;
+  },[]);
+
+  const visibleRects = rects.filter(r=>r.d<depth);
+  const redSum = visibleRects.filter(r=>r.c===0).reduce((s,r)=>s+r.w*r.h,0);
+
+  return <div className="card fade">
+    <h2>無窮幾何級數：⅓ + 1/9 + 1/27 + … = ½</h2>
+    <p className="sub">用兩種顏色交替填滿正方形：紅色和綠色各佔一半。</p>
+    <div className="viz">
+      <svg viewBox={`0 0 ${S+20} ${S+20}`}>
+        <rect x="10" y="10" width={S} height={S} fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="1.5" rx="3"/>
+        {visibleRects.map((r,i)=>
+          <rect key={i} x={10+r.x*S} y={10+r.y*S} width={r.w*S} height={r.h*S}
+            fill={r.c===0?'#EF4444':'#22C55E'} stroke="#fff" strokeWidth="1" rx="1" opacity=".75"
+            className="pop" style={{animationDelay:(i*.03)+'s'}}/>
+        )}
+      </svg>
+    </div>
+    {depth>0 && <div className="info bl">
+      <p className="f">紅色面積 = {depth===1?'1/3':depth===2?'1/3 + 1/9':depth===3?'1/3 + 1/9 + 1/27':depth===4?'1/3 + 1/9 + 1/27 + 1/81':'1/3 + 1/9 + … + 1/3^'+depth} = {redSum.toFixed(6)}</p>
+      <p className="f">綠色面積 = {redSum.toFixed(6)}（與紅色相同！）</p>
+    </div>}
+    {depth<maxDepth?
+      <button className="btn grn" onClick={()=>setDepth(d=>d+1)}>加入第 {depth+1} 層 （紅 + 綠各 1/{Math.pow(3,depth+1)}）</button>:
+      <div className="info gn" style={{textAlign:'center'}}><p className="f">✓ 紅色 + 綠色 → 填滿整個正方形</p></div>}
+    {depth>=2 && <div className="info gn fade">
+      <p style={{textAlign:'center',fontWeight:600,color:'#059669'}}>由於紅色 = 綠色，且兩色合共填滿整個正方形（面積 = 1）</p>
+      <p className="f" style={{marginTop:6,fontSize:'1.08rem'}}>所以 ⅓ + 1/9 + 1/27 + … = <strong>½</strong></p>
+    </div>}
+    {depth>=2 && <button className="btn pri fade" onClick={onNext}>下一步 →</button>}
+  </div>;
+}
+
+/* Phase 2.3: Challenge — 1/4 + 1/16 + 1/64 + ... = ? (triangle 3-color proof) */
+function L2P3({onNext}){
+  const [depth,setDepth] = useState(0);
+  const [ans,setAns] = useState('');
+  const [fb,setFb] = useState(null);
+  const [hint,setHint] = useState(0);
+  const [conf,setConf] = useState(false);
+  const maxDepth = 4;
+  const correct = 1/3; // answer is 1/3
+
+  // Generate colored triangles recursively
+  const triColors = ['#EF4444','#22C55E','#3B82F6']; // red green blue
+  const triangles = useMemo(()=>{
+    function gen(A,B,CC,d,max){
+      if(d>max) return [];
+      const mAB=mid(A,B), mBC=mid(B,CC), mAC=mid(A,CC);
+      return [
+        {pts:[A,mAB,mAC],c:0,d},
+        {pts:[mAB,B,mBC],c:1,d},
+        {pts:[mAC,mBC,CC],c:2,d},
+        ...gen(mAB,mBC,mAC,d+1,max)
+      ];
+    }
+    // equilateral triangle vertices
+    const A=[150,12], B=[12,250], CC=[288,250];
+    return gen(A,B,CC,1,maxDepth);
+  },[]);
+
+  const visTri = triangles.filter(t=>t.d<=depth);
+  const redArea = visTri.filter(t=>t.c===0).length;
+
+  const submit = ()=>{
+    const ev = safeEval(ans);
+    if(ev.val!==null && Math.abs(ev.val-correct)<0.001){setFb('ok');setConf(true);setTimeout(()=>setConf(false),3500);}
+    else{setFb('no');if(hint<2)setHint(h=>h+1);}
+  };
+
+  return <div className="card fade">
+    <Confetti show={conf}/>
+    <h2>🏆 挑戰題</h2>
+    <div className="info yw">
+      <p style={{fontWeight:700,fontSize:'1.02rem'}}>求無窮幾何級數之和：</p>
+      <p style={{fontWeight:700,fontSize:'1.08rem',textAlign:'center',margin:'6px 0'}}>¼ + 1/16 + 1/64 + 1/256 + … = ?</p>
+      <p style={{color:'#92400e',fontSize:'.85rem'}}>提示：觀察下面三角形中三種顏色的面積關係</p>
+    </div>
+
+    <div className="viz">
+      <svg viewBox="0 0 300 270">
+        {/* Outer triangle outline */}
+        <polygon points="150,12 12,250 288,250" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="1.5"/>
+        {/* Colored triangles */}
+        {visTri.map((t,i)=>
+          <polygon key={i} points={t.pts.map(p=>p.join(',')).join(' ')}
+            fill={triColors[t.c]} stroke="#fff" strokeWidth="1" opacity=".75"
+            className="pop" style={{animationDelay:(i*.02)+'s'}}/>
+        )}
+      </svg>
+    </div>
+
+    {depth<maxDepth?
+      <button className="btn pur" onClick={()=>setDepth(d=>d+1)}>加入第 {depth+1} 層細分</button>:
+      <div className="info gn" style={{textAlign:'center'}}><p className="f">✓ 三種顏色逐漸填滿整個三角形</p></div>}
+
+    {depth>=1 && <div className="info bl fade">
+      <p className="f">每次細分：中間三角形分成 4 份，3 種顏色各取 1 份</p>
+      <p className="f">紅色面積 = 綠色面積 = 藍色面積</p>
+      {depth>=2 && <p className="f" style={{marginTop:4}}>紅色 = ¼ + 1/16 + 1/64 + …</p>}
+    </div>}
+
+    {hint>=1 && <div className="info og fade"><p style={{fontWeight:700}}>💡 提示 1：三種顏色的面積完全相同</p><p>而三種顏色合共填滿整個三角形</p></div>}
+    {hint>=2 && <div className="info og fade"><p style={{fontWeight:700}}>💡 提示 2：三角形總面積 = 1</p><p>每種顏色 = 1 ÷ ? = ?</p></div>}
+
+    <div className="inp"><label>輸入算式計算答案：</label></div>
+    <CalcInput value={ans} onChange={v=>{setAns(v);setFb(null);}} onSubmit={submit} placeholder="例如 1/3" disabled={fb==='ok'}/>
+    <button className={"btn "+(ans&&safeEval(ans).val!==null?"pri":"dis")} onClick={submit} disabled={!ans||safeEval(ans).val===null}>提交答案</button>
+
+    {fb==='ok' && <div className="fb ok fade"><div className="em">🎉</div><div className="mg">答對了！</div><div className="dt">三種顏色各佔三角形的 ⅓，所以 ¼ + 1/16 + 1/64 + … = 1/3</div></div>}
+    {fb==='no' && <div className="fb no fade"><div className="mg">再試一次！</div><div className="dt">觀察三種顏色的對稱關係</div></div>}
+
+    {fb==='ok' && <button className="btn grn" onClick={onNext}>完成關卡！→</button>}
+  </div>;
+}
+
+/* ══════════════════════════════════════
+   LEVEL 3 — Summation Notation (Σ)
+   ══════════════════════════════════════ */
+
+/* Render a LaTeX string using KaTeX */
+function Tex({children,display}){
+  const ref = React.useRef(null);
+  React.useEffect(()=>{
+    if(ref.current && window.katex){
+      katex.render(children, ref.current, {displayMode:display!==false, throwOnError:false});
+    }
+  },[children,display]);
+  return <span ref={ref}/>;
+}
+
+/* Reusable component to render Σ notation with color highlights */
+function SigmaExpr({lower,upper,expr,highlights,scale}){
+  const sz = scale||1.8;
+  // Build LaTeX with color commands
+  const upperTex = (highlights==='upper'||highlights==='all') ? `{\\color{#dc2626}{${upper}}}` : upper;
+  const lowerTex = (highlights==='lower'||highlights==='all') ? `{\\color{#059669}{${lower}}}` : lower;
+  const exprTex  = (highlights==='expr' ||highlights==='all') ? `{\\color{#d97706}{${expr}}}` : expr;
+  const latex = `\\displaystyle\\sum_{${lowerTex}}^{${upperTex}} ${exprTex}`;
+  return <div style={{textAlign:'center',padding:'16px 0',fontSize:sz+'rem',lineHeight:1.4}}>
+    <Tex>{latex}</Tex>
+  </div>;
+}
+
+/* Phase 3.1: Introduction — what is summation notation */
+function L3P1({onNext}){
+  const [step,setStep] = useState(0);
+  const parts = [
+    {key:'all',  title:'求和符號 Σ（Sigma）', desc:'這個符號代表「把一系列的項加起來」。讓我們逐一認識它的各個部分。'},
+    {key:'lower',title:'下界：起始值',         desc:'下方的「i = 1」告訴我們：用變數 i，從 1 開始。'},
+    {key:'upper',title:'上界：結束值',         desc:'上方的「n」告訴我們：一直加到 i = n 為止。'},
+    {key:'expr', title:'通項：每一項的規則',    desc:'右方的「i²」是每一項的表達式。把 i 的值代入，就得到該項的值。'},
+    {key:'all',  title:'完整閱讀',              desc:'讀作：「i 從 1 到 n，把每個 i² 加起來」。'},
+  ];
+  const cur = parts[step];
+
+  return <div className="card fade">
+    <h2>認識求和符號 Σ</h2>
+    <p className="sub">Sigma（Σ）是數學中表示「加總」的簡潔寫法。</p>
+
+    <div className="viz" style={{background:'#fefce8',border:'2px solid #fde68a',borderRadius:14,padding:16}}>
+      <SigmaExpr lower="i = 1" upper="n" expr="i^2" highlights={cur.key} scale={2}/>
+    </div>
+
+    <div className="info bl fade" key={step} style={{minHeight:80}}>
+      <p style={{fontWeight:700,fontSize:'1.05rem',color:
+        cur.key==='lower'?'#059669':cur.key==='upper'?'#dc2626':cur.key==='expr'?'#d97706':'#4338ca'
+      }}>{cur.title}</p>
+      <p>{cur.desc}</p>
+    </div>
+
+    {step < parts.length-1 ?
+      <button className="btn grn" onClick={()=>setStep(s=>s+1)}>下一部分 →</button> :
+      <div className="info gn fade" style={{textAlign:'center'}}>
+        <p className="f">例如：當 n = 4 時</p>
+        <p className="f" style={{fontSize:'1.05rem',marginTop:8}}><Tex display={false}>{'\\sum_{i=1}^{4} i^2 = 1^2 + 2^2 + 3^2 + 4^2 = 1 + 4 + 9 + 16 = 30'}</Tex></p>
+      </div>
+    }
+    {step>=parts.length-1 && <button className="btn pri fade" onClick={onNext} style={{marginTop:8}}>下一步 →</button>}
+  </div>;
+}
+
+/* Phase 3.2: Interactive demo — Σ(i=1 to 10) i² */
+function L3P2({onNext}){
+  const [count,setCount] = useState(0);
+  const maxN = 10;
+  const terms = useMemo(()=>Array.from({length:maxN},(_,i)=>(i+1)*(i+1)),[]);
+  const runSum = terms.slice(0,count).reduce((a,b)=>a+b,0);
+  const totalSum = terms.reduce((a,b)=>a+b,0); // 385
+  const barMax = terms[maxN-1]; // 100
+
+  return <div className="card fade">
+    <h2>展開求和：Σ i²（i = 1 到 10）</h2>
+    <p className="sub">逐項加入，觀察每項的值和累計總和。</p>
+
+    <div className="viz" style={{padding:8}}>
+      <SigmaExpr lower="i = 1" upper="10" expr="i^2" highlights="all" scale={1.6}/>
+    </div>
+
+    {/* Bar chart of terms */}
+    <div className="viz">
+      <svg viewBox="0 0 400 200" style={{display:'block',width:'100%'}}>
+        {terms.map((v,i)=>{
+          const active = i < count;
+          const bw = 32, gap = 6, ml = 16;
+          const x = ml + i*(bw+gap);
+          const maxH = 140;
+          const h = (v/barMax)*maxH;
+          return <g key={i}>
+            <rect x={x} y={160-h} width={bw} height={h}
+              fill={active?C[i%C.length]:'#e5e7eb'} stroke={active?'#fff':'#d1d5db'} strokeWidth="1" rx="3"
+              opacity={active?.85:.4}/>
+            {active && <text x={x+bw/2} y={155-h} textAnchor="middle" fontSize="10" fontWeight="700" fill={C[i%C.length]}>{v}</text>}
+            <text x={x+bw/2} y={176} textAnchor="middle" fontSize="9" fontWeight="600" fill={active?'#374151':'#9ca3af'}>i={i+1}</text>
+          </g>;
+        })}
+      </svg>
+    </div>
+
+    {/* Expansion text */}
+    <div className="info bl">
+      <p className="f" style={{fontSize:'.88rem',wordBreak:'break-all'}}>
+        {count===0 ? '點擊下方按鈕開始加入各項' :
+          terms.slice(0,count).map((v,i)=>(i>0?' + ':'')+v).join('') + ' = ' + runSum}
+      </p>
+    </div>
+
+    <div className="sum">目前總和：{runSum}{count===maxN?' ✓':''}</div>
+
+    {count < maxN ?
+      <button className="btn grn" onClick={()=>setCount(c=>c+1)}>
+        加入第 {count+1} 項（{count+1}² = {(count+1)*(count+1)}）
+      </button> :
+      <div className="info gn fade" style={{textAlign:'center'}}>
+        <p className="f" style={{marginBottom:8}}><Tex display={false}>{'\\sum_{i=1}^{10} i^2 = '+totalSum}</Tex></p>
+        <p className="f" style={{fontSize:'.95rem'}}><Tex display={false}>{'\\frac{n(n+1)(2n+1)}{6} = \\frac{10 \\times 11 \\times 21}{6} = '+10*11*21/6}</Tex></p>
+      </div>
+    }
+    {count>=maxN && <button className="btn pri fade" style={{marginTop:8}} onClick={onNext}>下一步 →</button>}
+  </div>;
+}
+
+/* Phase 3.3: Challenge — Σ(i=3 to 8) (2i+1) = ? */
+function L3P3({onNext}){
+  const [ans,setAns] = useState('');
+  const [fb,setFb] = useState(null);
+  const [hint,setHint] = useState(0);
+  const [conf,setConf] = useState(false);
+  const [showExpand,setShowExpand] = useState(false);
+
+  // Σ(i=3 to 8) (2i+1): terms are 7, 9, 11, 13, 15, 17
+  const iStart=3, iEnd=8;
+  const terms = useMemo(()=>Array.from({length:iEnd-iStart+1},(_,k)=>2*(iStart+k)+1),[]);
+  const correct = terms.reduce((a,b)=>a+b,0); // 72
+  const n = terms.length; // 6
+
+  const submit = ()=>{
+    const ev = safeEval(ans);
+    if(ev.val!==null && Math.abs(ev.val-correct)<0.001){setFb('ok');setConf(true);setTimeout(()=>setConf(false),3500);}
+    else{setFb('no');if(hint<3)setHint(h=>h+1);}
+  };
+
+  return <div className="card fade">
+    <Confetti show={conf}/>
+    <h2>🏆 挑戰題</h2>
+
+    <div className="info yw">
+      <p style={{fontWeight:700,fontSize:'1.02rem'}}>求以下求和式的值：</p>
+    </div>
+
+    <div className="viz" style={{background:'#fefce8',border:'2px solid #fde68a',borderRadius:14,padding:12}}>
+      <SigmaExpr lower="i = 3" upper="8" expr="(2i+1)" highlights="all" scale={1.8}/>
+    </div>
+
+    {/* Expand toggle */}
+    <button className={"btn "+(showExpand?"org":"pur")} onClick={()=>setShowExpand(s=>!s)}>
+      {showExpand?'隱藏展開式':'展開求和式'}
+    </button>
+
+    {showExpand && <div className="info bl fade">
+      <p className="f" style={{fontSize:'.95rem'}}><Tex display={false}>{'i='+iStart+': \\quad 2('+iStart+')+1 = '+terms[0]}</Tex></p>
+      <p className="f" style={{fontSize:'.95rem'}}><Tex display={false}>{'i='+(iStart+1)+': \\quad 2('+(iStart+1)+')+1 = '+terms[1]}</Tex></p>
+      <p className="f" style={{fontSize:'.95rem'}}><Tex display={false}>{'i='+(iStart+2)+': \\quad 2('+(iStart+2)+')+1 = '+terms[2]}</Tex></p>
+      <p className="f" style={{fontSize:'.85rem',color:'#6b7280'}}>⋮</p>
+      <p className="f" style={{fontSize:'.95rem'}}><Tex display={false}>{'i='+iEnd+': \\quad 2('+iEnd+')+1 = '+terms[n-1]}</Tex></p>
+      <p className="f" style={{marginTop:8,fontSize:'1rem'}}><Tex display={false}>{'= '+terms.join(' + ')+' = \\;?'}</Tex></p>
+    </div>}
+
+    {hint>=1 && <div className="info og fade"><p style={{fontWeight:700}}>💡 提示 1：先把每項算出來</p><p>代入 i = 3, 4, 5, 6, 7, 8 到 (2i+1)</p></div>}
+    {hint>=2 && <div className="info og fade"><p style={{fontWeight:700}}>💡 提示 2：各項的值</p><p>{terms.join(', ')}（這是一個等差數列！）</p></div>}
+    {hint>=3 && <div className="info og fade"><p style={{fontWeight:700}}>💡 提示 3：用配對法或公式</p><p>S = {n} × ({terms[0]} + {terms[n-1]}) / 2</p></div>}
+
+    <div className="inp"><label>輸入算式計算答案：</label></div>
+    <CalcInput value={ans} onChange={v=>{setAns(v);setFb(null);}} onSubmit={submit} placeholder={'例如 '+n+'*('+terms[0]+'+'+terms[n-1]+')/2'} disabled={fb==='ok'}/>
+    <button className={"btn "+(ans&&safeEval(ans).val!==null?"pri":"dis")} onClick={submit} disabled={!ans||safeEval(ans).val===null}>提交答案</button>
+
+    {fb==='ok' && <div className="fb ok fade"><div className="em">🎉</div><div className="mg">答對了！</div><div className="dt">{terms.join(' + ')} = {correct}</div></div>}
+    {fb==='no' && <div className="fb no fade"><div className="mg">再試一次！</div><div className="dt">試試先展開求和式，再利用計算器求和</div></div>}
+
+    {fb==='ok' && <button className="btn grn" onClick={onNext}>完成關卡！→</button>}
+  </div>;
+}
+
+/* ══════════════════════════════════════
+   LEVEL 4 — Double Summation (ΣΣ)
+   ══════════════════════════════════════ */
+
+/* Reusable double-sigma LaTeX renderer */
+function DoubleSigmaExpr({iLower,iUpper,jLower,jUpper,expr,highlights,scale}){
+  const sz = scale||1.6;
+  const hi = highlights||'';
+  const wrap = (s,key,color)=>(hi===key||hi==='all')?`{\\color{${color}}{${s}}}`:s;
+  const latex = `\\displaystyle ${wrap('\\sum_{'+iLower+'}^{'+iUpper+'}','outer','#dc2626')} ${wrap('\\sum_{'+jLower+'}^{'+jUpper+'}','inner','#2563eb')} ${wrap(expr,'expr','#d97706')}`;
+  return <div style={{textAlign:'center',padding:'16px 0',fontSize:sz+'rem',lineHeight:1.4}}>
+    <Tex>{latex}</Tex>
+  </div>;
+}
+
+/* Phase 4.1: Introduction — what is double summation */
+function L4P1({onNext}){
+  const [step,setStep] = useState(0);
+  const parts = [
+    {key:'all',  title:'雙重求和 ΣΣ', desc:'兩個 Sigma 疊在一起，代表「先對內層求和，再對外層求和」。就像兩層迴圈。'},
+    {key:'inner',title:'內層求和（藍色）', desc:'先固定外層的 i，把內層 j 從 1 到 2 的所有項加起來。'},
+    {key:'outer',title:'外層求和（紅色）', desc:'內層加完後，再把 i 從 1 到 3 的結果加起來。'},
+    {key:'expr', title:'通項表達式', desc:'2ij 是每一項的規則。每次代入一組 (i, j) 就得到一個值。'},
+    {key:'all',  title:'完整閱讀', desc:'讀作：「i 從 1 到 3、j 從 1 到 2，把每個 2ij 全部加起來」。'},
+  ];
+  const cur = parts[step];
+  const done = step >= parts.length-1;
+
+  return <div className="card fade">
+    <h2>認識雙重求和 ΣΣ</h2>
+    <p className="sub">當求和涉及兩個變數時，我們用兩個 Sigma 來表示。</p>
+
+    <div className="viz" style={{background:'#fefce8',border:'2px solid #fde68a',borderRadius:14,padding:12}}>
+      <DoubleSigmaExpr iLower="i=1" iUpper="3" jLower="j=1" jUpper="2" expr="2ij" highlights={cur.key} scale={1.8}/>
+    </div>
+
+    <div className="info bl fade" key={step} style={{minHeight:80}}>
+      <p style={{fontWeight:700,fontSize:'1.05rem',color:
+        cur.key==='inner'?'#2563eb':cur.key==='outer'?'#dc2626':cur.key==='expr'?'#d97706':'#4338ca'
+      }}>{cur.title}</p>
+      <p>{cur.desc}</p>
+    </div>
+
+    {!done ?
+      <button className="btn grn" onClick={()=>setStep(s=>s+1)}>下一部分 →</button> :
+      <div className="info gn fade" style={{textAlign:'center'}}>
+        <p className="f" style={{marginBottom:6}}>展開過程：</p>
+        <p className="f" style={{fontSize:'.88rem',marginBottom:4}}><Tex display={false}>{'\\sum_{i=1}^{3}\\Bigl[\\sum_{j=1}^{2} 2ij\\Bigr] = \\sum_{i=1}^{3}(2i{\\cdot}1 + 2i{\\cdot}2) = \\sum_{i=1}^{3} 6i'}</Tex></p>
+        <p className="f" style={{fontSize:'.88rem'}}><Tex display={false}>{'= 6{\\times}1 + 6{\\times}2 + 6{\\times}3 = 6 + 12 + 18 = 36'}</Tex></p>
+      </div>
+    }
+    {done && <button className="btn pri fade" onClick={onNext} style={{marginTop:8}}>下一步 →</button>}
+  </div>;
+}
+
+/* Phase 4.2: Challenge — Σ(i=1 to 3) Σ(j=1 to 3) (i+j) = ? */
+function L4P2({onNext}){
+  const [ans,setAns] = useState('');
+  const [fb,setFb] = useState(null);
+  const [hint,setHint] = useState(0);
+  const [conf,setConf] = useState(false);
+  const [showExpand,setShowExpand] = useState(false);
+  const correct = 36;
+
+  const submit = ()=>{
+    const ev = safeEval(ans);
+    if(ev.val!==null && Math.abs(ev.val-correct)<0.001){setFb('ok');setConf(true);setTimeout(()=>setConf(false),3500);}
+    else{setFb('no');if(hint<3)setHint(h=>h+1);}
+  };
+
+  return <div className="card fade">
+    <Confetti show={conf}/>
+    <h2>🏆 挑戰題</h2>
+
+    <div className="info yw">
+      <p style={{fontWeight:700,fontSize:'1.02rem'}}>求以下雙重求和式的值：</p>
+    </div>
+
+    <div className="viz" style={{background:'#fefce8',border:'2px solid #fde68a',borderRadius:14,padding:12}}>
+      <DoubleSigmaExpr iLower="i=1" iUpper="3" jLower="j=1" jUpper="3" expr="(i+j)" highlights="all" scale={1.8}/>
+    </div>
+
+    {/* Expand toggle */}
+    <button className={"btn "+(showExpand?"org":"pur")} onClick={()=>setShowExpand(s=>!s)}>
+      {showExpand?'隱藏展開式':'展開求和式'}
+    </button>
+
+    {showExpand && <div className="info bl fade">
+      <p className="f" style={{fontWeight:700,fontSize:'.95rem',color:'#4338ca',marginBottom:6}}>Step 1：先算內層（固定 i，展開 j）</p>
+      <p className="f" style={{fontSize:'.92rem'}}><Tex display={false}>{'\\sum_{j=1}^{3}(i+j) = (i+1)+(i+2)+(i+3) = 3i+6'}</Tex></p>
+      <p className="f" style={{fontWeight:700,fontSize:'.95rem',color:'#4338ca',marginTop:10,marginBottom:6}}>Step 2：代入外層，展開每項</p>
+      <p className="f" style={{fontSize:'.92rem'}}><Tex display={false}>{'= 3(1)+6 + 3(2)+6 + 3(3)+6 = \\;?'}</Tex></p>
+    </div>}
+
+    {hint>=1 && <div className="info og fade"><p style={{fontWeight:700}}>💡 提示 1：先算內層</p><p>固定 i，把 j 從 1 到 3 展開：</p><p><Tex display={false}>{'\\sum_{j=1}^{3}(i+j) = (i+1)+(i+2)+(i+3) = 3i+6'}</Tex></p></div>}
+    {hint>=2 && <div className="info og fade"><p style={{fontWeight:700}}>💡 提示 2：代入外層</p><p><Tex display={false}>{'\\sum_{i=1}^{3}(3i+6)'}</Tex></p><p>展開：(3×1+6) + (3×2+6) + (3×3+6) = 9 + 12 + 15</p></div>}
+    {hint>=3 && <div className="info og fade"><p style={{fontWeight:700}}>💡 提示 3：加起來</p><p><Tex display={false}>{'9 + 12 + 15 = \\;?'}</Tex></p></div>}
+
+    <div className="inp"><label>輸入算式計算答案：</label></div>
+    <CalcInput value={ans} onChange={v=>{setAns(v);setFb(null);}} onSubmit={submit} placeholder="例如 9+12+15" disabled={fb==='ok'}/>
+    <button className={"btn "+(ans&&safeEval(ans).val!==null?"pri":"dis")} onClick={submit} disabled={!ans||safeEval(ans).val===null}>提交答案</button>
+
+    {fb==='ok' && <div className="fb ok fade"><div className="em">🎉</div><div className="mg">答對了！</div><div className="dt"><Tex display={false}>{'\\sum_{i=1}^{3}\\sum_{j=1}^{3}(i+j) = '+correct}</Tex></div></div>}
+    {fb==='no' && <div className="fb no fade"><div className="mg">再試一次！</div><div className="dt">試試先算內層求和，再代入外層</div></div>}
+
+    {fb==='ok' && <button className="btn grn" onClick={onNext}>完成關卡！→</button>}
+  </div>;
+}
+
+/* ── Completion ── */
+function Complete({level,onBack,onNextLevel}){
+  const nextNames = {1:'無窮幾何級數',2:'求和符號 Σ',3:'雙重求和 ΣΣ'};
+  return <div className="card comp fade">
+    <div className="big">🎉</div>
+    <h2>恭喜完成{level===1?'第一關':level===2?'第二關':level===3?'第三關':'第四關'}！</h2>
+
+    {level===1 && <>
+      <div style={{background:'#eff6ff',borderRadius:14,padding:'16px 18px',margin:'14px 0',textAlign:'left'}}>
+        <h3 style={{color:'#1e40af',fontSize:'1.05rem',marginBottom:8}}>什麼是等差級數？</h3>
+        <p style={{color:'#374151',fontSize:'.93rem',lineHeight:1.55,marginBottom:10}}>一列數字中，每相鄰兩項的差都相同，這就是<strong>等差數列</strong>。把它們全部加起來，就是<strong>等差級數</strong>。</p>
+        <p style={{color:'#374151',fontSize:'.93rem',lineHeight:1.55,marginBottom:6}}>例如：1, 2, 3, 4, 5 是等差數列（公差 = 1）</p>
+        <p style={{color:'#374151',fontSize:'.93rem',lineHeight:1.55}}>3, 7, 11, 15 也是等差數列（公差 = 4）</p>
+      </div>
+      <div style={{background:'#f0f0ff',borderRadius:14,padding:'14px 18px',margin:'0 0 14px'}}>
+        <p style={{fontWeight:700,color:'#4338ca',fontSize:'.95rem',marginBottom:6}}>重要公式</p>
+        <div style={{textAlign:'center',padding:'8px 0'}}><Tex>{'S = \\frac{n(a_1 + a_n)}{2}'}</Tex></div>
+        <p style={{color:'#6b7280',fontSize:'.85rem',marginTop:6}}>n = 項數，a₁ = 首項，aₙ = 末項</p>
+        <p style={{fontWeight:700,color:'#4338ca',fontSize:'.95rem',marginTop:10,marginBottom:6}}>核心方法</p>
+        <p style={{color:'#374151',fontSize:'.93rem'}}>配對法：把數列翻轉，首尾配對相加，每對的和都相同。</p>
+      </div>
+    </>}
+
+    {level===2 && <>
+      <div style={{background:'#fdf2f8',borderRadius:14,padding:'16px 18px',margin:'14px 0',textAlign:'left'}}>
+        <h3 style={{color:'#be185d',fontSize:'1.05rem',marginBottom:8}}>什麼是幾何數列和幾何級數？</h3>
+        <p style={{color:'#374151',fontSize:'.93rem',lineHeight:1.55,marginBottom:10}}>一列數字中，每一項都是前一項乘以一個固定的數（叫<strong>公比 r</strong>），這就是<strong>幾何數列</strong>（又叫等比數列）。</p>
+        <p style={{color:'#374151',fontSize:'.93rem',lineHeight:1.55,marginBottom:6}}>例如：1, 2, 4, 8, 16, …（公比 r = 2）</p>
+        <p style={{color:'#374151',fontSize:'.93rem',lineHeight:1.55,marginBottom:10}}>又如：1, ½, ¼, ⅛, …（公比 r = ½）</p>
+        <p style={{color:'#374151',fontSize:'.93rem',lineHeight:1.55}}>把幾何數列的項全部加起來，就是<strong>幾何級數</strong>。如果無限地加下去，就是<strong>無窮幾何級數</strong>。</p>
+      </div>
+      <div style={{background:'#f0f0ff',borderRadius:14,padding:'14px 18px',margin:'0 0 14px'}}>
+        <p style={{fontWeight:700,color:'#4338ca',fontSize:'.95rem',marginBottom:6}}>什麼時候有限和？</p>
+        <p style={{color:'#374151',fontSize:'.93rem',lineHeight:1.55,marginBottom:8}}>當公比 r 介乎 -1 和 1 之間（不含 -1 和 1）時，每一項會越來越小，總和會趨向一個確定的數。這叫做<strong>收斂</strong>。</p>
+        <div style={{textAlign:'center',padding:'8px 0'}}><Tex>{'S = \\frac{a}{1 - r} \\quad (-1 < r < 1,\\; r \\neq 0)'}</Tex></div>
+        <p style={{color:'#6b7280',fontSize:'.85rem',marginTop:6}}>a = 首項，r = 公比</p>
+        <p style={{fontWeight:700,color:'#4338ca',fontSize:'.95rem',marginTop:10,marginBottom:6}}>例子</p>
+        <p style={{color:'#374151',fontSize:'.93rem'}}><Tex display={false}>{'\\tfrac{1}{2}+\\tfrac{1}{4}+\\tfrac{1}{8}+\\cdots = 1'}</Tex>（a=½, r=½）</p>
+        <p style={{color:'#374151',fontSize:'.93rem',marginTop:4}}><Tex display={false}>{'\\tfrac{1}{3}+\\tfrac{1}{9}+\\tfrac{1}{27}+\\cdots = \\tfrac{1}{2}'}</Tex>（a=⅓, r=⅓）</p>
+      </div>
+      <div style={{background:'#fef2f2',borderRadius:14,padding:'14px 18px',margin:'0 0 14px',border:'2px solid #fecaca'}}>
+        <p style={{fontWeight:700,color:'#dc2626',fontSize:'.95rem',marginBottom:6}}>趣味知識：不是所有幾何級數都收斂！</p>
+        <p style={{color:'#374151',fontSize:'.93rem',lineHeight:1.55,marginBottom:6}}>當公比 r 大於或等於 1 時，每一項不會變小，總和會無限增長，永遠加不完。</p>
+        <p style={{color:'#374151',fontSize:'.93rem',lineHeight:1.55,marginBottom:4}}><Tex display={false}>{'1 + 2 + 4 + 8 + 16 + \\cdots = \\;?'}</Tex></p>
+        <p style={{color:'#dc2626',fontSize:'.93rem',fontWeight:600}}>這個級數的公比 r = 2，每項越來越大，和會趨向無限大（發散）！</p>
+      </div>
+    </>}
+
+    {level===3 && <>
+      <div style={{background:'#ecfdf5',borderRadius:14,padding:'16px 18px',margin:'14px 0',textAlign:'left'}}>
+        <h3 style={{color:'#047857',fontSize:'1.05rem',marginBottom:8}}>什麼是求和符號 Σ？</h3>
+        <p style={{color:'#374151',fontSize:'.93rem',lineHeight:1.55,marginBottom:10}}>Σ（Sigma）是希臘字母，在數學中代表「把一堆東西加起來」。它是一種簡潔的寫法，避免寫一長串加號。</p>
+        <p style={{color:'#374151',fontSize:'.93rem',lineHeight:1.55}}>Σ 下面寫起點，上面寫終點，右邊寫每一項的規則。</p>
+      </div>
+      <div style={{background:'#f0f0ff',borderRadius:14,padding:'14px 18px',margin:'0 0 14px'}}>
+        <p style={{fontWeight:700,color:'#4338ca',fontSize:'.95rem',marginBottom:6}}>怎麼讀？</p>
+        <div style={{textAlign:'center',padding:'8px 0'}}><Tex>{'\\sum_{i=1}^{n} f(i) = f(1) + f(2) + \\cdots + f(n)'}</Tex></div>
+        <p style={{color:'#6b7280',fontSize:'.85rem',marginTop:6}}>i = 變數（從下界跑到上界），f(i) = 每項的規則</p>
+        <p style={{fontWeight:700,color:'#4338ca',fontSize:'.95rem',marginTop:10,marginBottom:6}}>使用步驟</p>
+        <p style={{color:'#374151',fontSize:'.93rem'}}>1. 看下界和上界，確定 i 的範圍</p>
+        <p style={{color:'#374151',fontSize:'.93rem'}}>2. 把每個 i 代入通項公式</p>
+        <p style={{color:'#374151',fontSize:'.93rem'}}>3. 把所有結果加起來</p>
+      </div>
+    </>}
+
+    {level===4 && <>
+      <div style={{background:'#fffbeb',borderRadius:14,padding:'16px 18px',margin:'14px 0',textAlign:'left'}}>
+        <h3 style={{color:'#b45309',fontSize:'1.05rem',marginBottom:8}}>什麼是雙重求和 ΣΣ？</h3>
+        <p style={{color:'#374151',fontSize:'.93rem',lineHeight:1.55,marginBottom:10}}>當求和涉及<strong>兩個變數</strong>（例如 i 和 j）時，我們用兩個 Σ 來表示。就像兩層迴圈：外層控制 i，內層控制 j。</p>
+        <p style={{color:'#374151',fontSize:'.93rem',lineHeight:1.55}}>計算順序：<strong>先算內層</strong>（固定 i，把 j 的項加完），<strong>再算外層</strong>（把每個 i 的結果加起來）。</p>
+      </div>
+      <div style={{background:'#f0f0ff',borderRadius:14,padding:'14px 18px',margin:'0 0 14px'}}>
+        <p style={{fontWeight:700,color:'#4338ca',fontSize:'.95rem',marginBottom:6}}>怎麼讀？</p>
+        <div style={{textAlign:'center',padding:'8px 0'}}><Tex>{'\\sum_{i=1}^{m}\\sum_{j=1}^{n} f(i,j)'}</Tex></div>
+        <p style={{color:'#6b7280',fontSize:'.85rem',marginTop:6}}>「i 從 1 到 m、j 從 1 到 n，把每個 f(i,j) 全部加起來」</p>
+        <p style={{fontWeight:700,color:'#4338ca',fontSize:'.95rem',marginTop:10,marginBottom:6}}>計算步驟</p>
+        <p style={{color:'#374151',fontSize:'.93rem'}}>1. 固定外層的 i，展開內層的 j</p>
+        <p style={{color:'#374151',fontSize:'.93rem'}}>2. 化簡內層的結果（變成只含 i 的式子）</p>
+        <p style={{color:'#374151',fontSize:'.93rem'}}>3. 再把外層的 i 逐項代入，加起來</p>
+      </div>
+    </>}
+
+    {onNextLevel && <button className="btn grn" onClick={onNextLevel} style={{marginBottom:8}}>下一關：{nextNames[level]} →</button>}
+    <button className="btn pri" onClick={onBack}>返回選擇關卡 🔄</button>
+  </div>;
+}
+
+/* ── App ── */
+function App(){
+  const [screen,setScreen] = useState('select'); // select | l1 | l2 | l3
+  const [phase,setPhase] = useState(1);
+  const next = useCallback(()=>setPhase(p=>p+1),[]);
+  const goLevel = lv=>{setScreen(lv);setPhase(1);};
+  const back = ()=>{setScreen('select');setPhase(1);};
+  const levelName = {l1:'等差級數',l2:'無窮幾何級數',l3:'求和符號 Σ',l4:'雙重求和 ΣΣ'}[screen]||'';
+  const totalPhases = {l1:4,l2:3,l3:3,l4:2}[screen]||3;
+  const phaseNames = {l1:['1+2+…+5','1+2+…+50','一般等差級數','挑戰題'],l2:['½+¼+⅛+…','⅓+1/9+…','挑戰題'],l3:['認識 Σ','展開 Σi²','挑戰題'],l4:['認識 ΣΣ','展開 ΣΣ2ij','挑戰題']}[screen]||[];
+  const levels = useMemo(()=>[
+    {id:'l1',num:'Level 1',title:'等差級數之和',desc:'配對法求 1+2+…+n 及一般等差級數的和',bg:'linear-gradient(135deg,#6366f1,#818cf8)',icon:'📐'},
+    {id:'l2',num:'Level 2',title:'無窮幾何級數',desc:'用圖形證明 ½+¼+…=1、⅓+1/9+…=½',bg:'linear-gradient(135deg,#ec4899,#f472b6)',icon:'♾️'},
+    {id:'l3',num:'Level 3',title:'求和符號 Σ',desc:'認識 Sigma 記號，展開和計算求和式',bg:'linear-gradient(135deg,#10b981,#34d399)',icon:'Σ'},
+    {id:'l4',num:'Level 4',title:'雙重求和 ΣΣ',desc:'兩個變數的求和，用表格法逐步展開',bg:'linear-gradient(135deg,#f59e0b,#fbbf24)',icon:'ΣΣ'},
+  ],[]);
+  const sparkles = useMemo(()=>Array.from({length:8},(_,i)=>({
+    id:i,l:10+Math.random()*80,t:5+Math.random()*20,
+    c:['#6366f1','#ec4899','#f59e0b','#10b981','#a855f7'][i%5],
+    d:Math.random()*2
+  })),[]);
+
+  if(screen==='select'){
+    return <div className="app"><div className="body" style={{background:'linear-gradient(170deg,#f5f3ff 0%,#ede9fe 40%,#fce7f3 100%)'}}>
+      <div className="home fade">
+        <div className="home-hero" style={{position:'relative'}}>
+          {sparkles.map(s=><div key={s.id} className="sparkle" style={{left:s.l+'%',top:s.t+'%',background:s.c,animationDelay:s.d+'s'}}/>)}
+          <div className="home-symbols">＋ Σ ∞</div>
+          <div className="home-title">大加樂</div>
+          <div className="home-sub">加到停不了的數學探索之旅</div>
+        </div>
+        <div className="home-grid">
+          {levels.map((lv,i)=>
+            <div key={lv.id} className="lv-card fade" style={{background:lv.bg,animationDelay:(i*.08)+'s'}} onClick={()=>goLevel(lv.id)}>
+              <div className="lv-num">{lv.num}</div>
+              <h3>{lv.title}</h3>
+              <p>{lv.desc}</p>
+              <div className="lv-icon">{lv.icon}</div>
+              <div className="lv-arrow">→</div>
+            </div>
+          )}
+        </div>
+        <div className="home-footer">Maths Week 2025–26</div>
+      </div>
+    </div></div>;
+  }
+
+  return <div className="app">
+    <div className="hdr">
+      <div className="hdr-row">
+        <h1 style={{cursor:'pointer'}} onClick={back}>← {levelName}</h1>
+        <span className="badge">{phase<=totalPhases?phaseNames[phase-1]:'完成！'}</span>
+      </div>
+      <div className="steps">{Array.from({length:totalPhases},(_,i)=>i+1).map(i=><div key={i} className={'step'+(i<phase?' done':'')+(i===phase?' act':'')}/>)}</div>
+    </div>
+    <div className="body">
+      {screen==='l1' && <>
+        {phase===1 && <L1P1 onNext={next}/>}
+        {phase===2 && <L1P2 onNext={next}/>}
+        {phase===3 && <L1P3 onNext={next}/>}
+        {phase===4 && <L1P4 onNext={next}/>}
+        {phase===5 && <Complete level={1} onBack={back} onNextLevel={()=>goLevel('l2')}/>}
+      </>}
+      {screen==='l2' && <>
+        {phase===1 && <L2P1 onNext={next}/>}
+        {phase===2 && <L2P2 onNext={next}/>}
+        {phase===3 && <L2P3 onNext={next}/>}
+        {phase===4 && <Complete level={2} onBack={back} onNextLevel={()=>goLevel('l3')}/>}
+      </>}
+      {screen==='l3' && <>
+        {phase===1 && <L3P1 onNext={next}/>}
+        {phase===2 && <L3P2 onNext={next}/>}
+        {phase===3 && <L3P3 onNext={next}/>}
+        {phase===4 && <Complete level={3} onBack={back} onNextLevel={()=>goLevel('l4')}/>}
+      </>}
+      {screen==='l4' && <>
+        {phase===1 && <L4P1 onNext={next}/>}
+        {phase===2 && <L4P2 onNext={next}/>}
+        {phase===3 && <Complete level={4} onBack={back}/>}
+      </>}
+    </div>
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
