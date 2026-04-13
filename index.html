@@ -145,7 +145,7 @@ function CalcInput({value,onChange,onSubmit,placeholder,disabled}){
     {l:'4',v:'4'},{l:'5',v:'5'},{l:'6',v:'6'},{l:'×',v:'*',op:true},
     {l:'1',v:'1'},{l:'2',v:'2'},{l:'3',v:'3'},{l:'-',v:'-',op:true},
     {l:'0',v:'0'},{l:'.',v:'.'},{l:'(',v:'('},{l:')',v:')'},
-    {l:'^',v:'^',op:true},{l:'+',v:'+',op:true},{l:'⌫',v:'DEL',op:false,del:true},{l:'C',v:'CLR',op:false,del:true},
+    {l:'^',v:'^',op:true},{l:'+',v:'+',op:true},{l:'←',v:'DEL',op:false,del:true},{l:'C',v:'CLR',op:false,del:true},
   ];
 
   const insert = (ch)=>{
@@ -176,7 +176,7 @@ function CalcInput({value,onChange,onSubmit,placeholder,disabled}){
     <input ref={inputRef} className="calc-expr" type="text" inputMode="text"
       value={value} onChange={e=>onChange(e.target.value)}
       onKeyDown={handleKey}
-      placeholder={placeholder||'輸入算式，例如 7*(2+23)/2'}
+      placeholder={placeholder||'Type your answer'}
       disabled={disabled}/>
     <div className="calc-preview">
       {value ? (
@@ -308,14 +308,14 @@ function L1P2({onNext}){
   </div>;
 }
 
-/* Phase 1.3: General AS a=4, d=5, n=10 */
+/* Phase 1.3: General AS a=8, d=5, n=10 */
 function L1P3({onNext}){
   const [showPair,setShowPair] = useState(false);
-  const a=4,d=5,n=10;
+  const a=8,d=5,n=10;
   const terms = useMemo(()=>Array.from({length:n},(_,i)=>a+i*d),[]);
   const first=terms[0],last=terms[n-1],total=first+last,sum=n*total/2;
   return <div className="card fade">
-    <h2>等差級數：4, 9, 14, …, 49</h2>
+    <h2>等差級數：8, 13, 18, …, 53</h2>
     <p className="sub">首項 a = {a}，公差 d = {d}，共 {n} 項。用同樣的配對法求和。</p>
     <div className="viz"><StaircaseSVG terms={terms} showPair={showPair}/></div>
     <button className={"btn "+(showPair?"org":"grn")} onClick={()=>setShowPair(s=>!s)}>
@@ -331,14 +331,14 @@ function L1P3({onNext}){
   </div>;
 }
 
-/* Phase 1.4: Challenge a=2, d=3, n=8 → sum=100 */
+/* Phase 1.4: Challenge a=8, d=3, n=8 → sum=148 */
 function L1P4({onNext}){
   const [ans,setAns] = useState('');
   const [fb,setFb] = useState(null);
   const [hint,setHint] = useState(0);
   const [showPair,setShowPair] = useState(false);
   const [conf,setConf] = useState(false);
-  const a=2,d=3,n=8;
+  const a=8,d=3,n=8;
   const terms = useMemo(()=>Array.from({length:n},(_,i)=>a+i*d),[]);
   const first=terms[0],last=terms[n-1],total=first+last,correct=n*total/2; // 100
 
@@ -363,7 +363,7 @@ function L1P4({onNext}){
     {hint>=1 && <div className="info og fade"><p style={{fontWeight:700}}>💡 提示 1：首項 = {first}，末項 = {last}</p><p>首項 + 末項 = {first} + {last} = {total}</p></div>}
     {hint>=2 && <div className="info og fade"><p style={{fontWeight:700}}>💡 提示 2：共 {n} 項</p><p>S = {n} × {total} / 2 = ?</p></div>}
     <div className="inp"><label>輸入算式計算答案：</label></div>
-    <CalcInput value={ans} onChange={v=>{setAns(v);setFb(null);}} onSubmit={submit} placeholder={'例如 '+n+'*('+first+'+'+last+')/2'} disabled={fb==='ok'}/>
+    <CalcInput value={ans} onChange={v=>{setAns(v);setFb(null);}} onSubmit={submit} placeholder="Type your answer" disabled={fb==='ok'}/>
     <button className={"btn "+(ans&&safeEval(ans).val!==null?"pri":"dis")} onClick={submit} disabled={!ans||safeEval(ans).val===null}>提交答案</button>
     {fb==='ok' && <div className="fb ok fade"><div className="em">🎉</div><div className="mg">答對了！</div><div className="dt">S = {n} × ({first} + {last}) / 2 = {n} × {total/2} = {correct}</div></div>}
     {fb==='no' && <div className="fb no fade"><div className="mg">再試一次！</div><div className="dt">試試利用配對工具分析</div></div>}
@@ -451,11 +451,16 @@ function L2P2({onNext}){
     <div className="viz">
       <svg viewBox={`0 0 ${S+20} ${S+20}`}>
         <rect x="10" y="10" width={S} height={S} fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="1.5" rx="3"/>
-        {visibleRects.map((r,i)=>
-          <rect key={i} x={10+r.x*S} y={10+r.y*S} width={r.w*S} height={r.h*S}
-            fill={r.c===0?'#EF4444':'#22C55E'} stroke="#fff" strokeWidth="1" rx="1" opacity=".75"
-            className="pop" style={{animationDelay:(i*.03)+'s'}}/>
-        )}
+        {visibleRects.map((r,i)=>{
+          const rx=10+r.x*S, ry=10+r.y*S, rw=r.w*S, rh=r.h*S;
+          const frac=`1/${Math.pow(3,r.d+1)}`;
+          return <g key={i} className="pop" style={{animationDelay:(i*.03)+'s'}}>
+            <rect x={rx} y={ry} width={rw} height={rh}
+              fill={r.c===0?'#EF4444':'#22C55E'} stroke="#fff" strokeWidth="1" rx="1" opacity=".75"/>
+            {rw>22 && rh>14 && <text x={rx+rw/2} y={ry+rh/2+4} textAnchor="middle"
+              fontSize={Math.max(7,Math.min(13,rw*.28))} fill="#fff" fontWeight="700">{frac}</text>}
+          </g>;
+        })}
       </svg>
     </div>
     {depth>0 && <div className="info bl">
@@ -524,11 +529,18 @@ function L2P3({onNext}){
         {/* Outer triangle outline */}
         <polygon points="150,12 12,250 288,250" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="1.5"/>
         {/* Colored triangles */}
-        {visTri.map((t,i)=>
-          <polygon key={i} points={t.pts.map(p=>p.join(',')).join(' ')}
-            fill={triColors[t.c]} stroke="#fff" strokeWidth="1" opacity=".75"
-            className="pop" style={{animationDelay:(i*.02)+'s'}}/>
-        )}
+        {visTri.map((t,i)=>{
+          const cx=(t.pts[0][0]+t.pts[1][0]+t.pts[2][0])/3;
+          const cy=(t.pts[0][1]+t.pts[1][1]+t.pts[2][1])/3;
+          const dx=Math.max(...t.pts.map(p=>p[0]))-Math.min(...t.pts.map(p=>p[0]));
+          const frac=`1/${Math.pow(4,t.d)}`;
+          return <g key={i} className="pop" style={{animationDelay:(i*.02)+'s'}}>
+            <polygon points={t.pts.map(p=>p.join(',')).join(' ')}
+              fill={triColors[t.c]} stroke="#fff" strokeWidth="1" opacity=".75"/>
+            {dx>28 && <text x={cx} y={cy+4} textAnchor="middle"
+              fontSize={Math.max(7,Math.min(12,dx*.22))} fill="#fff" fontWeight="700">{frac}</text>}
+          </g>;
+        })}
       </svg>
     </div>
 
@@ -546,7 +558,7 @@ function L2P3({onNext}){
     {hint>=2 && <div className="info og fade"><p style={{fontWeight:700}}>💡 提示 2：三角形總面積 = 1</p><p>每種顏色 = 1 ÷ ? = ?</p></div>}
 
     <div className="inp"><label>輸入算式計算答案：</label></div>
-    <CalcInput value={ans} onChange={v=>{setAns(v);setFb(null);}} onSubmit={submit} placeholder="例如 1/3" disabled={fb==='ok'}/>
+    <CalcInput value={ans} onChange={v=>{setAns(v);setFb(null);}} onSubmit={submit} placeholder="Type your answer" disabled={fb==='ok'}/>
     <button className={"btn "+(ans&&safeEval(ans).val!==null?"pri":"dis")} onClick={submit} disabled={!ans||safeEval(ans).val===null}>提交答案</button>
 
     {fb==='ok' && <div className="fb ok fade"><div className="em">🎉</div><div className="mg">答對了！</div><div className="dt">三種顏色各佔三角形的 ⅓，所以 ¼ + 1/16 + 1/64 + … = 1/3</div></div>}
@@ -675,7 +687,6 @@ function L3P2({onNext}){
       </button> :
       <div className="info gn fade" style={{textAlign:'center'}}>
         <p className="f" style={{marginBottom:8}}><Tex display={false}>{'\\sum_{i=1}^{10} i^2 = '+totalSum}</Tex></p>
-        <p className="f" style={{fontSize:'.95rem'}}><Tex display={false}>{'\\frac{n(n+1)(2n+1)}{6} = \\frac{10 \\times 11 \\times 21}{6} = '+10*11*21/6}</Tex></p>
       </div>
     }
     {count>=maxN && <button className="btn pri fade" style={{marginTop:8}} onClick={onNext}>下一步 →</button>}
@@ -688,7 +699,7 @@ function L3P3({onNext}){
   const [fb,setFb] = useState(null);
   const [hint,setHint] = useState(0);
   const [conf,setConf] = useState(false);
-  const [showExpand,setShowExpand] = useState(false);
+  const [expandCount,setExpandCount] = useState(0);
 
   // Σ(i=3 to 8) (2i+1): terms are 7, 9, 11, 13, 15, 17
   const iStart=3, iEnd=8;
@@ -714,30 +725,134 @@ function L3P3({onNext}){
       <SigmaExpr lower="i = 3" upper="8" expr="(2i+1)" highlights="all" scale={1.8}/>
     </div>
 
-    {/* Expand toggle */}
-    <button className={"btn "+(showExpand?"org":"pur")} onClick={()=>setShowExpand(s=>!s)}>
-      {showExpand?'隱藏展開式':'展開求和式'}
-    </button>
+    {/* Expand step-by-step */}
+    {expandCount === 0 &&
+      <button className="btn pur" onClick={()=>setExpandCount(1)}>展開求和式</button>
+    }
 
-    {showExpand && <div className="info bl fade">
-      <p className="f" style={{fontSize:'.95rem'}}><Tex display={false}>{'i='+iStart+': \\quad 2('+iStart+')+1 = '+terms[0]}</Tex></p>
-      <p className="f" style={{fontSize:'.95rem'}}><Tex display={false}>{'i='+(iStart+1)+': \\quad 2('+(iStart+1)+')+1 = '+terms[1]}</Tex></p>
-      <p className="f" style={{fontSize:'.95rem'}}><Tex display={false}>{'i='+(iStart+2)+': \\quad 2('+(iStart+2)+')+1 = '+terms[2]}</Tex></p>
-      <p className="f" style={{fontSize:'.85rem',color:'#6b7280'}}>⋮</p>
-      <p className="f" style={{fontSize:'.95rem'}}><Tex display={false}>{'i='+iEnd+': \\quad 2('+iEnd+')+1 = '+terms[n-1]}</Tex></p>
-      <p className="f" style={{marginTop:8,fontSize:'1rem'}}><Tex display={false}>{'= '+terms.join(' + ')+' = \\;?'}</Tex></p>
+    {expandCount > 0 && <div className="info bl fade">
+      {Array.from({length:expandCount},(_,k)=>{
+        const i = iStart+k;
+        return <p key={k} className="f" style={{fontSize:'.95rem'}}>
+          <Tex display={false}>{'i='+i+': \\quad 2('+i+')+1 = '+terms[k]}</Tex>
+        </p>;
+      })}
+      {expandCount >= n &&
+        <p className="f" style={{marginTop:8,fontSize:'1rem'}}>
+          <Tex display={false}>{'= '+terms.join(' + ')+' = \\;?'}</Tex>
+        </p>
+      }
     </div>}
+
+    {expandCount > 0 && expandCount < n &&
+      <button className="btn grn" onClick={()=>setExpandCount(c=>c+1)}>
+        下一項：i = {iStart+expandCount} →
+      </button>
+    }
+    {expandCount > 0 &&
+      <button className="btn org" style={{marginTop:4}} onClick={()=>setExpandCount(0)}>隱藏展開式</button>
+    }
 
     {hint>=1 && <div className="info og fade"><p style={{fontWeight:700}}>💡 提示 1：先把每項算出來</p><p>代入 i = 3, 4, 5, 6, 7, 8 到 (2i+1)</p></div>}
     {hint>=2 && <div className="info og fade"><p style={{fontWeight:700}}>💡 提示 2：各項的值</p><p>{terms.join(', ')}（這是一個等差數列！）</p></div>}
     {hint>=3 && <div className="info og fade"><p style={{fontWeight:700}}>💡 提示 3：用配對法或公式</p><p>S = {n} × ({terms[0]} + {terms[n-1]}) / 2</p></div>}
 
     <div className="inp"><label>輸入算式計算答案：</label></div>
-    <CalcInput value={ans} onChange={v=>{setAns(v);setFb(null);}} onSubmit={submit} placeholder={'例如 '+n+'*('+terms[0]+'+'+terms[n-1]+')/2'} disabled={fb==='ok'}/>
+    <CalcInput value={ans} onChange={v=>{setAns(v);setFb(null);}} onSubmit={submit} placeholder="Type your answer" disabled={fb==='ok'}/>
     <button className={"btn "+(ans&&safeEval(ans).val!==null?"pri":"dis")} onClick={submit} disabled={!ans||safeEval(ans).val===null}>提交答案</button>
 
     {fb==='ok' && <div className="fb ok fade"><div className="em">🎉</div><div className="mg">答對了！</div><div className="dt">{terms.join(' + ')} = {correct}</div></div>}
     {fb==='no' && <div className="fb no fade"><div className="mg">再試一次！</div><div className="dt">試試先展開求和式，再利用計算器求和</div></div>}
+
+    {fb==='ok' && <button className="btn grn" onClick={onNext}>下一挑戰 →</button>}
+  </div>;
+}
+
+/* Phase 3.4: Bonus Challenge — Σ(i=1 to 100) (-1)^i */
+function L3P4({onNext}){
+  const [ans,setAns] = useState('');
+  const [fb,setFb] = useState(null);
+  const [hint,setHint] = useState(0);
+  const [conf,setConf] = useState(false);
+  const [expandCount,setExpandCount] = useState(0);
+  const correct = 0;
+  const maxExpand = 6; // show first 6 terms
+
+  const submit = ()=>{
+    const ev = safeEval(ans);
+    if(ev.val!==null && Math.abs(ev.val-correct)<0.001){setFb('ok');setConf(true);setTimeout(()=>setConf(false),3500);}
+    else{setFb('no');if(hint<3)setHint(h=>h+1);}
+  };
+
+  // First maxExpand terms: (-1)^1=-1, (-1)^2=+1, ...
+  const termVal = k => k%2===0 ? -1 : 1; // k is 0-indexed, so i=k+1: (-1)^(k+1)
+  const termStr = k => k%2===0 ? '-1' : '+1';
+
+  return <div className="card fade">
+    <Confetti show={conf}/>
+    <h2>🏆 挑戰題 2</h2>
+
+    <div className="info yw">
+      <p style={{fontWeight:700,fontSize:'1.02rem'}}>求以下求和式的值：</p>
+    </div>
+
+    <div className="viz" style={{background:'#fefce8',border:'2px solid #fde68a',borderRadius:14,padding:12}}>
+      <SigmaExpr lower="i = 1" upper="100" expr="(-1)^i" highlights="all" scale={1.8}/>
+    </div>
+
+    {/* Step-by-step expansion */}
+    {expandCount === 0 &&
+      <button className="btn pur" onClick={()=>setExpandCount(1)}>展開求和式</button>
+    }
+
+    {expandCount > 0 && <div className="info bl fade">
+      {Array.from({length:expandCount},(_,k)=>{
+        const i = k+1;
+        const val = Math.pow(-1,i);
+        return <p key={k} className="f" style={{fontSize:'.95rem'}}>
+          <Tex display={false}>{`i=${i}: \\quad (-1)^{${i}} = ${val > 0 ? '+1' : '-1'}`}</Tex>
+        </p>;
+      })}
+      {expandCount >= maxExpand &&
+        <p className="f" style={{marginTop:8,fontSize:'.92rem',color:'#6b7280'}}>
+          <Tex display={false}>{`(-1)+1+(-1)+1+\\cdots \\quad (\\text{100 terms})`}</Tex>
+        </p>
+      }
+    </div>}
+
+    {expandCount > 0 && expandCount < maxExpand &&
+      <button className="btn grn" onClick={()=>setExpandCount(c=>c+1)}>
+        下一項：i = {expandCount+1} →
+      </button>
+    }
+    {expandCount > 0 &&
+      <button className="btn org" style={{marginTop:4}} onClick={()=>setExpandCount(0)}>隱藏展開式</button>
+    }
+
+    {hint>=1 && <div className="info og fade">
+      <p style={{fontWeight:700}}>💡 提示 1：觀察規律</p>
+      <p>i 為奇數時 (−1)^i = −1，i 為偶數時 (−1)^i = +1</p>
+    </div>}
+    {hint>=2 && <div className="info og fade">
+      <p style={{fontWeight:700}}>💡 提示 2：配對</p>
+      <p>每兩項可以配對：(−1 + 1) = 0</p>
+      <p>從 1 到 100 共有多少對？</p>
+    </div>}
+    {hint>=3 && <div className="info og fade">
+      <p style={{fontWeight:700}}>💡 提示 3：計算</p>
+      <p>100 項 = 50 對，每對 = 0，所以總和 = 50 × 0 = ?</p>
+    </div>}
+
+    <div className="inp"><label>輸入算式計算答案：</label></div>
+    <CalcInput value={ans} onChange={v=>{setAns(v);setFb(null);}} onSubmit={submit} placeholder="Type your answer" disabled={fb==='ok'}/>
+    <button className={"btn "+(ans&&safeEval(ans).val!==null?"pri":"dis")} onClick={submit} disabled={!ans||safeEval(ans).val===null}>提交答案</button>
+
+    {fb==='ok' && <div className="fb ok fade">
+      <div className="em">🎉</div>
+      <div className="mg">答對了！</div>
+      <div className="dt">50 對 (−1+1) 相消，總和 = 0</div>
+    </div>}
+    {fb==='no' && <div className="fb no fade"><div className="mg">再試一次！</div><div className="dt">試試展開頭幾項，找出規律</div></div>}
 
     {fb==='ok' && <button className="btn grn" onClick={onNext}>完成關卡！→</button>}
   </div>;
@@ -842,7 +957,7 @@ function L4P2({onNext}){
     {hint>=3 && <div className="info og fade"><p style={{fontWeight:700}}>💡 提示 3：加起來</p><p><Tex display={false}>{'9 + 12 + 15 = \\;?'}</Tex></p></div>}
 
     <div className="inp"><label>輸入算式計算答案：</label></div>
-    <CalcInput value={ans} onChange={v=>{setAns(v);setFb(null);}} onSubmit={submit} placeholder="例如 9+12+15" disabled={fb==='ok'}/>
+    <CalcInput value={ans} onChange={v=>{setAns(v);setFb(null);}} onSubmit={submit} placeholder="Type your answer" disabled={fb==='ok'}/>
     <button className={"btn "+(ans&&safeEval(ans).val!==null?"pri":"dis")} onClick={submit} disabled={!ans||safeEval(ans).val===null}>提交答案</button>
 
     {fb==='ok' && <div className="fb ok fade"><div className="em">🎉</div><div className="mg">答對了！</div><div className="dt"><Tex display={false}>{'\\sum_{i=1}^{3}\\sum_{j=1}^{3}(i+j) = '+correct}</Tex></div></div>}
@@ -947,13 +1062,13 @@ function App(){
   const goLevel = lv=>{setScreen(lv);setPhase(1);};
   const back = ()=>{setScreen('select');setPhase(1);};
   const levelName = {l1:'等差級數',l2:'無窮幾何級數',l3:'求和符號 Σ',l4:'雙重求和 ΣΣ'}[screen]||'';
-  const totalPhases = {l1:4,l2:3,l3:3,l4:2}[screen]||3;
-  const phaseNames = {l1:['1+2+…+5','1+2+…+50','一般等差級數','挑戰題'],l2:['½+¼+⅛+…','⅓+1/9+…','挑戰題'],l3:['認識 Σ','展開 Σi²','挑戰題'],l4:['認識 ΣΣ','展開 ΣΣ2ij','挑戰題']}[screen]||[];
+  const totalPhases = {l1:4,l2:3,l3:4,l4:2}[screen]||3;
+  const phaseNames = {l1:['1+2+…+5','1+2+…+50','一般等差級數','挑戰題'],l2:['½+¼+⅛+…','⅓+1/9+…','挑戰題'],l3:['認識 Σ','展開 Σi²','挑戰題 1','挑戰題 2'],l4:['認識 ΣΣ','展開 ΣΣ2ij','挑戰題']}[screen]||[];
   const levels = useMemo(()=>[
     {id:'l1',num:'Level 1',title:'等差級數之和',desc:'配對法求 1+2+…+n 及一般等差級數的和',bg:'linear-gradient(135deg,#6366f1,#818cf8)',icon:'📐'},
     {id:'l2',num:'Level 2',title:'無窮幾何級數',desc:'用圖形證明 ½+¼+…=1、⅓+1/9+…=½',bg:'linear-gradient(135deg,#ec4899,#f472b6)',icon:'♾️'},
     {id:'l3',num:'Level 3',title:'求和符號 Σ',desc:'認識 Sigma 記號，展開和計算求和式',bg:'linear-gradient(135deg,#10b981,#34d399)',icon:'Σ'},
-    {id:'l4',num:'Level 4',title:'雙重求和 ΣΣ',desc:'兩個變數的求和，用表格法逐步展開',bg:'linear-gradient(135deg,#f59e0b,#fbbf24)',icon:'ΣΣ'},
+    {id:'l4',num:'Level 4',title:'雙重求和 ΣΣ',desc:'兩個變數的求和，逐步展開',bg:'linear-gradient(135deg,#f59e0b,#fbbf24)',icon:'ΣΣ'},
   ],[]);
   const sparkles = useMemo(()=>Array.from({length:8},(_,i)=>({
     id:i,l:10+Math.random()*80,t:5+Math.random()*20,
@@ -1012,7 +1127,8 @@ function App(){
         {phase===1 && <L3P1 onNext={next}/>}
         {phase===2 && <L3P2 onNext={next}/>}
         {phase===3 && <L3P3 onNext={next}/>}
-        {phase===4 && <Complete level={3} onBack={back} onNextLevel={()=>goLevel('l4')}/>}
+        {phase===4 && <L3P4 onNext={next}/>}
+        {phase===5 && <Complete level={3} onBack={back} onNextLevel={()=>goLevel('l4')}/>}
       </>}
       {screen==='l4' && <>
         {phase===1 && <L4P1 onNext={next}/>}
